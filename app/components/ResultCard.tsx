@@ -45,17 +45,12 @@ const getDefaultRank = (score: number) => {
   };
   return { 
     title: "🧘 Enlightened Exit Liquidity",
-    quote: "You're not losing money, you're gaining experience",
+    quote: "You're not gaining money, you're gaining experience",
     traits: ["Buys tops", "Perfect exit timing (for others)", "Chart pattern believer"],
     copingLevel: 40,
     rugResistance: 30,
     hopiumAddiction: 60
   };
-};
-
-const generateTraumaPercentage = (score: number) => {
-  // Convert score to a percentage (max score possible is 50)
-  return Math.min(Math.round((score / 50) * 100), 100);
 };
 
 const StatBar = ({ label, value, color }: { label: string; value: number; color: string }) => (
@@ -81,7 +76,6 @@ export default function ResultCard({ score, twitterUsername }: ResultCardProps) 
   const cardRef = useRef<HTMLDivElement>(null);
   const [currentRank, setCurrentRank] = useState(getDefaultRank(score));
   const [traits, setTraits] = useState(currentRank.traits || []);
-  const traumaPercentage = Math.min(100, Math.round((score / 50) * 100));
 
   useEffect(() => {
     const timer = setTimeout(() => setIsCardFlipped(true), 500);
@@ -100,7 +94,7 @@ export default function ResultCard({ score, twitterUsername }: ResultCardProps) 
 
   // Generate title only once when component mounts
   useEffect(() => {
-    const titleKey = `trauma-title-${score}`;
+    const titleKey = `trauma-title-${score}-${twitterUsername || ''}`;
     const cachedTitle = sessionStorage.getItem(titleKey);
 
     const generateTitle = async () => {
@@ -116,7 +110,7 @@ export default function ResultCard({ score, twitterUsername }: ResultCardProps) 
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            score: traumaPercentage,
+            score: score,
             traits: currentRank.traits,
             username: twitterUsername
           }),
@@ -136,7 +130,7 @@ export default function ResultCard({ score, twitterUsername }: ResultCardProps) 
     };
 
     generateTitle();
-  }, [score, currentRank.traits, traumaPercentage]); // Added missing dependencies
+  }, [score, currentRank.traits, twitterUsername]);
 
   const generateImage = async () => {
     const cardBack = cardRef.current?.querySelector('.card-back') as HTMLDivElement;
@@ -186,7 +180,7 @@ export default function ResultCard({ score, twitterUsername }: ResultCardProps) 
       return;
     }
 
-    const text = `I got ${currentRank.title} with ${traumaPercentage}% Crypto Trauma.\n${currentRank.quote}\n\nCheck your trauma score at rugmeter.app 👉`;
+    const text = `I got ${currentRank.title} with ${score}% Crypto Trauma.\n${currentRank.quote}\n\nCheck your trauma score at rugmeter.app 👉`;
     const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`;
     window.open(twitterUrl, '_blank');
   };
@@ -280,7 +274,7 @@ export default function ResultCard({ score, twitterUsername }: ResultCardProps) 
                 fill="none"
                 stroke="url(#gradient)"
                 strokeWidth="3"
-                strokeDasharray={`${traumaPercentage}, 100`}
+                strokeDasharray={`${score}, 100`}
               />
               <defs>
                 <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
@@ -291,7 +285,7 @@ export default function ResultCard({ score, twitterUsername }: ResultCardProps) 
               </defs>
             </svg>
             <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <span className="text-2xl font-bold text-white">{traumaPercentage}%</span>
+              <span className="text-2xl font-bold text-white">{score}%</span>
               <span className="text-xs text-purple-300">TRAUMA</span>
             </div>
           </div>
