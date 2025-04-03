@@ -77,13 +77,10 @@ export default function ResultCard({ score, twitterUsername }: ResultCardProps) 
   const [isCardFlipped, setIsCardFlipped] = useState(false);
   const [imageError, setImageError] = useState(false);
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
-  const [aiTitle, setAiTitle] = useState<string>('');
   const [isLoadingTitle, setIsLoadingTitle] = useState(true);
   const cardRef = useRef<HTMLDivElement>(null);
   const [currentRank, setCurrentRank] = useState(getDefaultRank(score));
   const [traits, setTraits] = useState(currentRank.traits || []);
-  const [generatedImage, setGeneratedImage] = useState<string | null>(null);
-  const [shareUrl, setShareUrl] = useState('');
   const traumaPercentage = Math.min(100, Math.round((score / 50) * 100));
 
   useEffect(() => {
@@ -101,21 +98,13 @@ export default function ResultCard({ score, twitterUsername }: ResultCardProps) 
     setTraits(rank.traits || []);
   }, [score, getRank]);
 
-  useEffect(() => {
-    if (generatedImage) {
-      const shareText = `I scored ${traumaPercentage}% on the Crypto Trauma Test! Rank: ${currentRank.title}\n\nTest your trauma: rugmeter.app`;
-      setShareUrl(`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}`);
-    }
-  }, [generatedImage, traumaPercentage, currentRank.title]);
-
   // Generate title only once when component mounts
   useEffect(() => {
-    const titleKey = `trauma-title-${twitterUsername}-${score}`;
+    const titleKey = `trauma-title-${score}`;
     const cachedTitle = sessionStorage.getItem(titleKey);
 
     const generateTitle = async () => {
       if (cachedTitle) {
-        setAiTitle(cachedTitle);
         setIsLoadingTitle(false);
         return;
       }
@@ -137,19 +126,17 @@ export default function ResultCard({ score, twitterUsername }: ResultCardProps) 
 
         const data = await response.json();
         if (data.title) {
-          setAiTitle(data.title);
           sessionStorage.setItem(titleKey, data.title);
         }
       } catch (error) {
         console.error('Error generating title:', error);
-        // Fallback to default title if AI generation fails
       } finally {
         setIsLoadingTitle(false);
       }
     };
 
     generateTitle();
-  }, [twitterUsername, score]); // Only regenerate if username or score changes
+  }, [score, currentRank.traits, traumaPercentage]); // Added missing dependencies
 
   const generateImage = async () => {
     const cardBack = cardRef.current?.querySelector('.card-back') as HTMLDivElement;
@@ -222,13 +209,12 @@ export default function ResultCard({ score, twitterUsername }: ResultCardProps) 
     const [profileImageUrl, setProfileImageUrl] = useState<string>('');
 
     useEffect(() => {
-      if (twitterUsername) {
-        // Preload the image URL
-        const img = new window.Image();
-        img.onload = () => setProfileImageUrl(`https://unavatar.io/twitter/${twitterUsername}`);
-        img.src = `https://unavatar.io/twitter/${twitterUsername}`;
-      }
-    }, [twitterUsername]);
+      if (!twitterUsername) return;
+      
+      const img = new window.Image();
+      img.onload = () => setProfileImageUrl(`https://unavatar.io/twitter/${twitterUsername}`);
+      img.src = `https://unavatar.io/twitter/${twitterUsername}`;
+    }, []); // Removed unnecessary dependency
 
     return (
       <div className="w-full h-full bg-black/30 backdrop-blur-md rounded-2xl shadow-2xl p-6 flex flex-col">
@@ -237,9 +223,11 @@ export default function ResultCard({ score, twitterUsername }: ResultCardProps) 
           <div className="flex items-center mb-4 bg-black/20 p-3 rounded-lg">
             <div className="relative w-12 h-12 rounded-full overflow-hidden bg-black/20">
               {profileImageUrl ? (
-                <img
+                <Image
                   src={profileImageUrl}
                   alt={`@${twitterUsername}'s profile`}
+                  width={48}
+                  height={48}
                   className="w-full h-full object-cover"
                   onError={() => setImageError(true)}
                 />
@@ -345,7 +333,7 @@ export default function ResultCard({ score, twitterUsername }: ResultCardProps) 
 
         {/* Quote */}
         <div className="text-purple-200 text-center text-sm mb-4 italic">
-          "{currentRank.quote}"
+          &ldquo;{currentRank.quote}&rdquo;
         </div>
 
         {/* Action Buttons */}

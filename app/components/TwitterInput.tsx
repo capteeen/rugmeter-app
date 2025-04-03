@@ -25,7 +25,7 @@ export default function TwitterInput({ onSubmit }: TwitterInputProps) {
     try {
       await new Promise(resolve => setTimeout(resolve, 1000));
       onSubmit(username.trim());
-    } catch (error) {
+    } catch {
       setError('Failed to validate username');
     } finally {
       setIsLoading(false);
