@@ -57,7 +57,11 @@ const TokenSection = () => {
   );
 };
 
-export default function Hero() {
+interface HeroProps {
+  onStart: () => void;
+}
+
+export default function Hero({ onStart }: HeroProps) {
   const [isHovered, setIsHovered] = useState(false);
   const [mounted, setMounted] = useState(false);
 
@@ -66,7 +70,7 @@ export default function Hero() {
   }, []);
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-purple-900 via-indigo-900 to-pink-800 p-4 relative overflow-hidden">
+    <div className="min-h-screen flex flex-col items-center justify-center p-4 relative overflow-hidden">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -85,6 +89,7 @@ export default function Hero() {
           onHoverEnd={() => setIsHovered(false)}
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
+          onClick={onStart}
           className={`
             px-8 py-4 text-xl font-bold rounded-lg
             bg-gradient-to-r from-pink-500 via-purple-500 to-cyan-500

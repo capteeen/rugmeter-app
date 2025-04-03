@@ -2,19 +2,23 @@
 
 import { useState } from 'react';
 import Quiz from '../components/Quiz';
-import { useRouter } from 'next/navigation';
 
 export default function QuizPage() {
-  const router = useRouter();
   const [score, setScore] = useState(0);
 
   const handleQuizComplete = (finalScore: number) => {
     setScore(finalScore);
-    // Navigate to result page with the score
-    router.push(`/result?score=${finalScore}`);
+    // Handle quiz completion, e.g., redirect to results
   };
 
   return (
-    <Quiz onComplete={handleQuizComplete} />
+    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-indigo-900 to-pink-800">
+      <Quiz onComplete={handleQuizComplete} />
+      {score > 0 && (
+        <div className="text-center text-white mt-4">
+          Your current score: {score}%
+        </div>
+      )}
+    </div>
   );
 } 
