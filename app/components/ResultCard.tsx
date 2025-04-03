@@ -54,12 +54,12 @@ const getDefaultRank = (score: number) => {
 };
 
 const StatBar = ({ label, value, color }: { label: string; value: number; color: string }) => (
-  <div className="mb-2">
-    <div className="flex justify-between text-sm mb-1">
+  <div className="mb-2 sm:mb-3 w-full">
+    <div className="flex justify-between text-[10px] sm:text-sm mb-1">
       <span className="text-purple-200">{label}</span>
       <span className="text-white">{value}%</span>
     </div>
-    <div className="h-2 bg-black/20 rounded-full overflow-hidden">
+    <div className="h-1.5 sm:h-2 bg-black/20 rounded-full overflow-hidden">
       <div 
         className={`h-full rounded-full ${color}`}
         style={{ width: `${value}%`, transition: 'width 1s ease-out' }}
@@ -73,6 +73,7 @@ export default function ResultCard({ score, twitterUsername }: ResultCardProps) 
   const [imageError, setImageError] = useState(false);
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
   const [isLoadingTitle, setIsLoadingTitle] = useState(true);
+  const [profileImageUrl, setProfileImageUrl] = useState('');
   const cardRef = useRef<HTMLDivElement>(null);
   const [currentRank, setCurrentRank] = useState(getDefaultRank(score));
   const [traits, setTraits] = useState(currentRank.traits || []);
@@ -81,6 +82,14 @@ export default function ResultCard({ score, twitterUsername }: ResultCardProps) 
     const timer = setTimeout(() => setIsCardFlipped(true), 500);
     return () => clearTimeout(timer);
   }, []);
+
+  useEffect(() => {
+    if (!twitterUsername) return;
+    
+    const img = new window.Image();
+    img.onload = () => setProfileImageUrl(`https://unavatar.io/twitter/${twitterUsername}`);
+    img.src = `https://unavatar.io/twitter/${twitterUsername}`;
+  }, [twitterUsername]);
 
   const getRank = useCallback((score: number) => {
     return getDefaultRank(score);
@@ -200,16 +209,6 @@ export default function ResultCard({ score, twitterUsername }: ResultCardProps) 
   };
 
   const CardContent = () => {
-    const [profileImageUrl, setProfileImageUrl] = useState<string>('');
-
-    useEffect(() => {
-      if (!twitterUsername) return;
-      
-      const img = new window.Image();
-      img.onload = () => setProfileImageUrl(`https://unavatar.io/twitter/${twitterUsername}`);
-      img.src = `https://unavatar.io/twitter/${twitterUsername}`;
-    }, []); // Removed unnecessary dependency
-
     return (
       <div className="w-full h-full bg-black/30 backdrop-blur-md rounded-2xl shadow-2xl p-6 flex flex-col">
         {/* Card Header with Twitter Profile */}
@@ -386,46 +385,187 @@ export default function ResultCard({ score, twitterUsername }: ResultCardProps) 
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-900 via-indigo-900 to-pink-800 p-4">
+    <div className="min-h-screen w-full flex flex-col items-center justify-center bg-gradient-to-br from-purple-900 via-indigo-900 to-pink-800 p-2 sm:p-4">
+      {/* Card Container */}
       <motion.div
         ref={cardRef}
         initial={{ scale: 0.8, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ duration: 0.5 }}
-        className="perspective"
+        className="perspective w-[280px] xs:w-[320px] sm:w-[360px] md:w-[400px]"
       >
         <motion.div
           animate={{ rotateY: isCardFlipped ? 180 : 0 }}
           transition={{ duration: 0.8, type: "spring" }}
-          className="relative w-[320px] sm:w-[400px] aspect-[3/4] preserve-3d"
+          className="relative w-full aspect-[3/4] preserve-3d"
         >
           {/* Front of card */}
           <div className="absolute inset-0 backface-hidden card-front">
-            <div className="w-full h-full bg-black/30 backdrop-blur-md rounded-2xl shadow-2xl flex items-center justify-center">
-              <div className="text-white text-2xl">Calculating your trauma... 💭</div>
+            <div className="w-full h-full bg-black/30 backdrop-blur-md rounded-xl sm:rounded-2xl shadow-2xl flex items-center justify-center p-2 sm:p-3 md:p-4">
+              <div className="text-white text-sm sm:text-base md:text-xl text-center">Calculating your trauma... 💭</div>
             </div>
           </div>
 
           {/* Back of card */}
           <div className="absolute inset-0 backface-hidden rotate-y-180 card-back bg-gradient-to-br from-purple-900 via-indigo-900 to-pink-800">
-            <CardContent />
+            <div className="w-full h-full bg-black/30 backdrop-blur-md rounded-xl sm:rounded-2xl shadow-2xl p-2 xs:p-3 sm:p-4 md:p-6 flex flex-col">
+              {/* Card Header with Twitter Profile */}
+              {twitterUsername && !imageError && (
+                <div className="flex items-center mb-2 sm:mb-3 md:mb-4 bg-black/20 p-1.5 sm:p-2 md:p-3 rounded-lg">
+                  <div className="relative w-7 h-7 xs:w-8 xs:h-8 sm:w-10 sm:h-10 rounded-full overflow-hidden bg-black/20">
+                    <Image
+                      src={profileImageUrl || `https://unavatar.io/twitter/${twitterUsername}`}
+                      alt={`@${twitterUsername}'s profile`}
+                      width={48}
+                      height={48}
+                      className="w-full h-full object-cover"
+                      onError={() => setImageError(true)}
+                      priority
+                    />
+                  </div>
+                  <div className="ml-2 sm:ml-3">
+                    <div className="text-white text-[10px] xs:text-xs sm:text-sm font-medium">@{twitterUsername}</div>
+                    <div className="text-purple-300 text-[8px] xs:text-[10px] sm:text-xs">Certified Degen</div>
+                  </div>
+                </div>
+              )}
+
+              {/* Brain Icon and Rank Title */}
+              <div className="text-center mb-2 sm:mb-3 md:mb-4">
+                <div className="text-3xl xs:text-4xl sm:text-5xl mb-1 sm:mb-2">🧠</div>
+                <h2 className="text-lg xs:text-xl sm:text-2xl md:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-purple-500 to-cyan-500">
+                  {currentRank.title}
+                </h2>
+              </div>
+
+              {/* Trauma Score Circle */}
+              <div className="flex justify-center mb-2 sm:mb-3 md:mb-4">
+                <div className="relative w-16 xs:w-20 sm:w-24 md:w-28 aspect-square">
+                  <svg className="w-full h-full -rotate-90" viewBox="0 0 36 36">
+                    <path
+                      d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                      fill="none"
+                      stroke="rgba(255, 255, 255, 0.1)"
+                      strokeWidth="3"
+                      strokeLinecap="round"
+                    />
+                    <path
+                      d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                      fill="none"
+                      stroke="url(#gradient)"
+                      strokeWidth="3"
+                      strokeLinecap="round"
+                      strokeDasharray={`${score}, 100`}
+                    />
+                    <defs>
+                      <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" stopColor="#ec4899" />
+                        <stop offset="50%" stopColor="#a855f7" />
+                        <stop offset="100%" stopColor="#06b6d4" />
+                      </linearGradient>
+                    </defs>
+                  </svg>
+                  <div className="absolute inset-0 flex flex-col items-center justify-center">
+                    <span className="text-xl xs:text-2xl sm:text-3xl font-bold text-white">{score}%</span>
+                    <span className="text-[8px] xs:text-[10px] sm:text-xs text-purple-300">TRAUMA</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Degen Traits */}
+              <div className="mb-2 sm:mb-3 md:mb-4">
+                <div className="text-purple-200 text-[10px] xs:text-xs sm:text-sm mb-1 sm:mb-1.5 md:mb-2">DEGEN TRAITS:</div>
+                <div className="flex flex-wrap gap-1 xs:gap-1.5 sm:gap-2">
+                  {traits.map((trait, index) => (
+                    <span
+                      key={index}
+                      className="px-1.5 xs:px-2 sm:px-2.5 py-0.5 sm:py-1 bg-white/10 rounded-full text-[8px] xs:text-[10px] sm:text-xs text-white"
+                    >
+                      {trait}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              {/* Stats Bars */}
+              <div className="mb-2 sm:mb-3 md:mb-4">
+                <StatBar 
+                  label="Coping Level" 
+                  value={currentRank.copingLevel} 
+                  color="bg-gradient-to-r from-green-500 to-emerald-500"
+                />
+                <StatBar 
+                  label="Rug Resistance" 
+                  value={currentRank.rugResistance} 
+                  color="bg-gradient-to-r from-blue-500 to-cyan-500"
+                />
+                <StatBar 
+                  label="Hopium Addiction" 
+                  value={currentRank.hopiumAddiction} 
+                  color="bg-gradient-to-r from-pink-500 to-rose-500"
+                />
+              </div>
+
+              {/* Quote */}
+              <div className="text-purple-200 text-center text-[8px] xs:text-[10px] sm:text-xs md:text-sm mb-2 sm:mb-3 md:mb-4 italic">
+                &ldquo;{currentRank.quote}&rdquo;
+              </div>
+
+              {/* Watermark */}
+              <div className="mt-auto text-center text-[8px] xs:text-[10px] sm:text-xs text-purple-300/50">
+                rugmeter.app
+              </div>
+            </div>
           </div>
         </motion.div>
       </motion.div>
-      <div className="mt-6 text-center text-purple-300/50 text-sm">
-        &ldquo;{currentRank.quote}&rdquo;
+
+      {/* Action Buttons - Moved outside the card */}
+      <div className="w-[280px] xs:w-[320px] sm:w-[360px] md:w-[400px] mt-4 sm:mt-6 space-y-2 sm:space-y-3">
+        <motion.button
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          onClick={handleTwitterShare}
+          disabled={isGeneratingImage}
+          className="w-full py-2.5 sm:py-3 px-4 bg-[#1DA1F2] hover:bg-[#1a8cd8]
+                   text-white rounded-xl text-sm sm:text-base font-semibold shadow-lg
+                   disabled:opacity-50 disabled:cursor-not-allowed
+                   flex items-center justify-center gap-2"
+        >
+          {isGeneratingImage ? (
+            <span>Generating...</span>
+          ) : (
+            <>
+              <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/>
+              </svg>
+              Share on Twitter
+            </>
+          )}
+        </motion.button>
+
+        <motion.button
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          onClick={handleDownload}
+          disabled={isGeneratingImage}
+          className="w-full py-2.5 sm:py-3 px-4 bg-gradient-to-r from-pink-500 via-purple-500 to-cyan-500 
+                   text-white rounded-xl text-sm sm:text-base font-semibold shadow-lg
+                   disabled:opacity-50 disabled:cursor-not-allowed
+                   flex items-center justify-center gap-2"
+        >
+          {isGeneratingImage ? (
+            <span>Generating...</span>
+          ) : (
+            <>
+              <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+              </svg>
+              Download Card
+            </>
+          )}
+        </motion.button>
       </div>
-      {twitterUsername && (
-        <div className="absolute top-4 right-4 w-12 h-12 rounded-full overflow-hidden">
-          <Image
-            src={`https://unavatar.io/twitter/${twitterUsername}`}
-            alt="Profile"
-            width={48}
-            height={48}
-            className="w-full h-full object-cover"
-          />
-        </div>
-      )}
     </div>
   );
 } 
