@@ -3,12 +3,16 @@
 import { useState } from 'react';
 import Quiz from '../components/Quiz';
 
-export default function QuizPage() {
+interface QuizPageProps {
+  onComplete?: (score: number) => void;
+}
+
+export default function QuizPage({ onComplete }: QuizPageProps) {
   const [score, setScore] = useState(0);
 
   const handleQuizComplete = (finalScore: number) => {
     setScore(finalScore);
-    // Handle quiz completion, e.g., redirect to results
+    onComplete?.(finalScore);
   };
 
   return (
