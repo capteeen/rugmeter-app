@@ -1,103 +1,165 @@
-import Image from "next/image";
+'use client';
+
+import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import Hero from './components/Hero';
+import Quiz from './components/Quiz';
+import ResultCard from './components/ResultCard';
+import TwitterInput from './components/TwitterInput';
+
+// Floating meme elements
+const MemeElements = () => (
+  <div className="fixed inset-0 pointer-events-none overflow-hidden">
+    <motion.div
+      className="absolute text-6xl"
+      animate={{
+        x: ['0%', '100%'],
+        y: ['0%', '100%'],
+      }}
+      transition={{
+        duration: 20,
+        repeat: Infinity,
+        repeatType: "reverse"
+      }}
+    >
+      🚀
+    </motion.div>
+    <motion.div
+      className="absolute right-0 text-6xl"
+      animate={{
+        x: ['0%', '-100%'],
+        y: ['100%', '0%'],
+      }}
+      transition={{
+        duration: 15,
+        repeat: Infinity,
+        repeatType: "reverse"
+      }}
+    >
+      💎
+    </motion.div>
+    <motion.div
+      className="absolute bottom-0 text-6xl"
+      animate={{
+        x: ['100%', '0%'],
+        y: ['0%', '-100%'],
+      }}
+      transition={{
+        duration: 25,
+        repeat: Infinity,
+        repeatType: "reverse"
+      }}
+    >
+      🌙
+    </motion.div>
+  </div>
+);
+
+// Progress bar component
+const ProgressBar = ({ step }: { step: string }) => {
+  const steps = ['hero', 'twitter', 'quiz', 'result'];
+  const currentIndex = steps.indexOf(step);
+  
+  return (
+    <div className="fixed top-0 left-0 w-full h-1 bg-black/20 z-50">
+      <motion.div
+        className="h-full bg-gradient-to-r from-pink-500 via-purple-500 to-cyan-500"
+        initial={{ width: '0%' }}
+        animate={{ width: `${((currentIndex + 1) / steps.length) * 100}%` }}
+        transition={{ duration: 0.5 }}
+      />
+    </div>
+  );
+};
+
+// Stats counter
+const StatsCounter = () => {
+  const [degens, setDegens] = useState(42069);
+  const [rugs, setRugs] = useState(1337);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setDegens(prev => prev + Math.floor(Math.random() * 3));
+      setRugs(prev => prev + Math.floor(Math.random() * 2));
+    }, 3000);
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <div className="fixed bottom-4 left-4 bg-black/30 backdrop-blur-md rounded-lg p-3 text-xs text-white/70">
+      <div>🤡 {degens.toLocaleString()} Degens Traumatized</div>
+      <div>🏃 {rugs.toLocaleString()} Rugs Pulled</div>
+    </div>
+  );
+};
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const [currentStep, setCurrentStep] = useState<'hero' | 'twitter' | 'quiz' | 'result'>('hero');
+  const [score, setScore] = useState(0);
+  const [twitterUsername, setTwitterUsername] = useState('');
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
+  const handleStartQuiz = () => {
+    setCurrentStep('twitter');
+  };
+
+  const handleTwitterSubmit = (username: string) => {
+    setTwitterUsername(username);
+    setCurrentStep('quiz');
+  };
+
+  const handleQuizComplete = (finalScore: number) => {
+    setScore(finalScore);
+    setCurrentStep('result');
+  };
+
+  return (
+    <main className="relative min-h-screen bg-gradient-to-br from-purple-900 via-indigo-900 to-pink-800">
+      {/* Background elements */}
+      <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-purple-900/20 via-black/50 to-black/80" />
+      <div className="fixed inset-0 bg-[url('/grid.svg')] opacity-20" />
+      
+      {/* Meme elements */}
+      <MemeElements />
+      
+      {/* Progress bar */}
+      <ProgressBar step={currentStep} />
+      
+      {/* Stats counter */}
+      <StatsCounter />
+
+      {/* Main content */}
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={currentStep}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -20 }}
+          transition={{ duration: 0.3 }}
         >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+          {currentStep === 'hero' && (
+            <div onClick={handleStartQuiz} className="cursor-pointer">
+              <Hero />
+            </div>
+          )}
+          
+          {currentStep === 'twitter' && (
+            <TwitterInput onSubmit={handleTwitterSubmit} />
+          )}
+          
+          {currentStep === 'quiz' && (
+            <Quiz onComplete={handleQuizComplete} />
+          )}
+          
+          {currentStep === 'result' && (
+            <ResultCard score={score} twitterUsername={twitterUsername} />
+          )}
+        </motion.div>
+      </AnimatePresence>
+
+      {/* Footer */}
+      <div className="fixed bottom-4 right-4 text-white/30 text-xs">
+        Powered by 🧠 AI & 💀 Trauma
+      </div>
+    </main>
   );
 }
