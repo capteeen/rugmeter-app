@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import Image from 'next/image';
 
 interface TwitterInputProps {
   onSubmit: (username: string) => void;
@@ -13,84 +12,84 @@ export default function TwitterInput({ onSubmit }: TwitterInputProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const handleSubmit = async () => {
-    if (!username) {
-      setError('Please enter your Twitter username');
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+
+    if (!username.trim()) {
+      setError('Please enter a username');
       return;
     }
 
     setIsLoading(true);
-    setError('');
-
     try {
-      // Remove @ if user included it
-      const cleanUsername = username.replace('@', '');
-      onSubmit(cleanUsername);
-    } catch (err) {
-      setError('Failed to fetch Twitter profile');
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      onSubmit(username.trim());
+    } catch (error) {
+      setError('Failed to validate username');
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleSkip = () => {
-    onSubmit('');
-  };
-
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-900 via-indigo-900 to-pink-800 p-4">
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="max-w-md w-full bg-black/30 backdrop-blur-md p-8 rounded-2xl shadow-2xl"
+        initial={{ scale: 0.9, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ duration: 0.5 }}
+        className="w-full max-w-md bg-black/30 backdrop-blur-md p-8 rounded-2xl shadow-2xl"
       >
-        <div className="text-center mb-8">
-          <h2 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-purple-500 to-cyan-500">
-            Add Your Twitter
-          </h2>
-          <p className="text-purple-200 mt-2">
-            Let's make your trauma card more personal 🎭
-          </p>
-        </div>
+        <h2 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-purple-500 to-cyan-500 mb-2">
+          Add Your Twitter
+        </h2>
+        <p className="text-purple-200 mb-6">
+          Let&apos;s make your trauma card more personal 🎭
+        </p>
 
-        <div className="space-y-4">
+        <form onSubmit={handleSubmit}>
           <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+              <span className="text-purple-300/70 text-lg">@</span>
+            </div>
             <input
               type="text"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              placeholder="@username"
-              className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg 
-                       text-white placeholder-purple-300 focus:outline-none focus:ring-2 
-                       focus:ring-purple-500 focus:border-transparent"
+              className="w-full pl-9 pr-4 py-4 bg-black/20 border border-white/10 rounded-xl 
+                       text-white text-lg placeholder-purple-300/30 focus:outline-none focus:border-purple-500/50
+                       transition-colors"
+              placeholder="username"
             />
-            {error && (
-              <p className="text-pink-500 text-sm mt-2">{error}</p>
-            )}
           </div>
+
+          {error && (
+            <div className="mt-2 text-pink-500 text-sm">
+              {error}
+            </div>
+          )}
 
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            onClick={handleSubmit}
+            type="submit"
             disabled={isLoading}
-            className="w-full py-3 px-4 bg-gradient-to-r from-pink-500 via-purple-500 to-cyan-500 
-                     text-white rounded-lg font-semibold shadow-lg hover:shadow-pink-500/25
-                     disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full mt-6 py-3 bg-gradient-to-r from-pink-500 via-purple-500 to-cyan-500
+                     text-white rounded-lg font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isLoading ? 'Loading...' : 'Continue 🚀'}
+            {isLoading ? "Checking..." : "Continue"}
           </motion.button>
+        </form>
 
-          <button
-            onClick={handleSkip}
-            className="w-full text-purple-300 text-sm hover:text-white transition-colors"
-          >
-            Skip for now
-          </button>
-        </div>
+        <button
+          onClick={() => onSubmit('')}
+          className="w-full mt-4 text-purple-300 text-sm hover:text-white transition-colors"
+        >
+          Skip for now
+        </button>
 
-        <div className="mt-8 text-center text-purple-300 text-xs">
-          *We'll use this to display your profile picture on your trauma card
+        <div className="mt-6 text-xs text-center text-purple-300/50">
+          *We&apos;ll use this to display your profile picture on your trauma card
         </div>
       </motion.div>
     </div>

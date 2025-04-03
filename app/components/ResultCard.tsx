@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import * as htmlToImage from 'html-to-image';
@@ -80,17 +80,33 @@ export default function ResultCard({ score, twitterUsername }: ResultCardProps) 
   const [aiTitle, setAiTitle] = useState<string>('');
   const [isLoadingTitle, setIsLoadingTitle] = useState(true);
   const cardRef = useRef<HTMLDivElement>(null);
-  const defaultRank = getDefaultRank(score);
-  const rank = {
-    ...defaultRank,
-    title: aiTitle || defaultRank.title
-  };
-  const traumaPercentage = generateTraumaPercentage(score);
+  const [currentRank, setCurrentRank] = useState(getDefaultRank(score));
+  const [traits, setTraits] = useState(currentRank.traits || []);
+  const [generatedImage, setGeneratedImage] = useState<string | null>(null);
+  const [shareUrl, setShareUrl] = useState('');
+  const traumaPercentage = Math.min(100, Math.round((score / 50) * 100));
 
   useEffect(() => {
     const timer = setTimeout(() => setIsCardFlipped(true), 500);
     return () => clearTimeout(timer);
   }, []);
+
+  const getRank = useCallback((score: number) => {
+    return getDefaultRank(score);
+  }, []);
+
+  useEffect(() => {
+    const rank = getRank(score);
+    setCurrentRank(rank);
+    setTraits(rank.traits || []);
+  }, [score, getRank]);
+
+  useEffect(() => {
+    if (generatedImage) {
+      const shareText = `I scored ${traumaPercentage}% on the Crypto Trauma Test! Rank: ${currentRank.title}\n\nTest your trauma: rugmeter.app`;
+      setShareUrl(`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}`);
+    }
+  }, [generatedImage, traumaPercentage, currentRank.title]);
 
   // Generate title only once when component mounts
   useEffect(() => {
@@ -112,7 +128,7 @@ export default function ResultCard({ score, twitterUsername }: ResultCardProps) 
           },
           body: JSON.stringify({
             score: traumaPercentage,
-            traits: defaultRank.traits,
+            traits: currentRank.traits,
             username: twitterUsername
           }),
         });
@@ -183,7 +199,7 @@ export default function ResultCard({ score, twitterUsername }: ResultCardProps) 
       return;
     }
 
-    const text = `I got ${rank.title} with ${traumaPercentage}% Crypto Trauma.\n${rank.quote}\n\nCheck your trauma score at rugmeter.app 👉`;
+    const text = `I got ${currentRank.title} with ${traumaPercentage}% Crypto Trauma.\n${currentRank.quote}\n\nCheck your trauma score at rugmeter.app 👉`;
     const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`;
     window.open(twitterUrl, '_blank');
   };
@@ -252,7 +268,7 @@ export default function ResultCard({ score, twitterUsername }: ResultCardProps) 
             <div className="h-9 w-48 mx-auto bg-white/10 animate-pulse rounded"></div>
           ) : (
             <h2 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-purple-500 to-cyan-500">
-              {rank.title}
+              {currentRank.title}
             </h2>
           )}
         </div>
@@ -297,7 +313,7 @@ export default function ResultCard({ score, twitterUsername }: ResultCardProps) 
         <div className="mb-4">
           <div className="text-purple-200 text-sm mb-2">DEGEN TRAITS:</div>
           <div className="flex flex-wrap gap-2">
-            {rank.traits.map((trait, index) => (
+            {traits.map((trait, index) => (
               <span
                 key={index}
                 className="px-2 py-1 bg-white/10 rounded-full text-xs text-white"
@@ -312,24 +328,24 @@ export default function ResultCard({ score, twitterUsername }: ResultCardProps) 
         <div className="mb-4">
           <StatBar 
             label="Coping Level" 
-            value={rank.copingLevel} 
+            value={currentRank.copingLevel} 
             color="bg-gradient-to-r from-green-500 to-emerald-500"
           />
           <StatBar 
             label="Rug Resistance" 
-            value={rank.rugResistance} 
+            value={currentRank.rugResistance} 
             color="bg-gradient-to-r from-blue-500 to-cyan-500"
           />
           <StatBar 
             label="Hopium Addiction" 
-            value={rank.hopiumAddiction} 
+            value={currentRank.hopiumAddiction} 
             color="bg-gradient-to-r from-pink-500 to-rose-500"
           />
         </div>
 
         {/* Quote */}
         <div className="text-purple-200 text-center text-sm mb-4 italic">
-          "{rank.quote}"
+          "{currentRank.quote}"
         </div>
 
         {/* Action Buttons */}
@@ -414,6 +430,20 @@ export default function ResultCard({ score, twitterUsername }: ResultCardProps) 
           </div>
         </motion.div>
       </motion.div>
+      <div className="mt-6 text-center text-purple-300/50 text-sm">
+        &ldquo;{currentRank.quote}&rdquo;
+      </div>
+      {twitterUsername && (
+        <div className="absolute top-4 right-4 w-12 h-12 rounded-full overflow-hidden">
+          <Image
+            src={`https://unavatar.io/twitter/${twitterUsername}`}
+            alt="Profile"
+            width={48}
+            height={48}
+            className="w-full h-full object-cover"
+          />
+        </div>
+      )}
     </div>
   );
 } 
