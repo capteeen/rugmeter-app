@@ -3,16 +3,13 @@
 import { useState } from 'react';
 import Quiz from '../components/Quiz';
 
-interface QuizPageProps {
-  onComplete?: (score: number) => void;
-}
-
-export default function QuizPage({ onComplete }: QuizPageProps) {
+export default function QuizPage() {
   const [score, setScore] = useState(0);
 
   const handleQuizComplete = (finalScore: number) => {
     setScore(finalScore);
-    onComplete?.(finalScore);
+    // Navigate back to home with the score
+    window.history.pushState({ score: finalScore }, '', '/');
   };
 
   return (
