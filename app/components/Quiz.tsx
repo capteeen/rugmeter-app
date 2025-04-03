@@ -7,12 +7,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 const questions = [
   {
     id: 1,
-    question: "What did you do when $PEPE dumped 80% in 2 hours?",
+    question: "Your favorite token just dumped 80% in a day. What's your move?",
     options: [
-      { text: "Bought the dip 🤑", score: 8 },
-      { text: "Panic sold everything 😱", score: 5 },
-      { text: "Watched in frozen horror 😶", score: 3 },
-      { text: "What's $PEPE? 👶", score: 1 }
+      { text: "Buy more, it's just a dip! 🤑", score: 8 },
+      { text: "Panic sell everything 😱", score: 5 },
+      { text: "Stare at the chart frozen 😶", score: 3 },
+      { text: "What dump? I never check prices 👶", score: 1 }
     ]
   },
   {
