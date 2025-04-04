@@ -106,7 +106,7 @@ export async function POST(req: NextRequest) {
               wordBreak: 'break-word',
             }}
           >
-            "{quote}"
+            &ldquo;{quote}&rdquo;
           </div>
 
           {/* Watermark */}

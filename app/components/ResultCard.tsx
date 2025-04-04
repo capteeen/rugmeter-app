@@ -1,20 +1,11 @@
 'use client';
 
 import { useEffect, useState, useRef, useCallback } from 'react';
-import { motion } from 'framer-motion';
 import Image from 'next/image';
-import domtoimage from 'dom-to-image-more';
 
 interface ResultCardProps {
   score: number;
   twitterUsername?: string;
-}
-
-interface DomToImageOptions {
-  width?: number;
-  height?: number;
-  quality?: number;
-  style?: Partial<CSSStyleDeclaration>;
 }
 
 const getDefaultRank = (score: number) => {
