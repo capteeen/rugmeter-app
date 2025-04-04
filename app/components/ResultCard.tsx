@@ -3,11 +3,18 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
-import * as htmlToImage from 'html-to-image';
+import domtoimage from 'dom-to-image-more';
 
 interface ResultCardProps {
   score: number;
   twitterUsername?: string;
+}
+
+interface DomToImageOptions {
+  width?: number;
+  height?: number;
+  quality?: number;
+  style?: Partial<CSSStyleDeclaration>;
 }
 
 const getDefaultRank = (score: number) => {
@@ -53,6 +60,39 @@ const getDefaultRank = (score: number) => {
   };
 };
 
+const CircleProgress = ({ value }: { value: number }) => (
+  <svg 
+    className="w-full h-full" 
+    viewBox="0 0 36 36" 
+    style={{ transform: 'rotate(-90deg)' }}
+  >
+    <path
+      d="M18 2.0845
+        a 15.9155 15.9155 0 0 1 0 31.831
+        a 15.9155 15.9155 0 0 1 0 -31.831"
+      fill="none"
+      stroke="rgba(255, 255, 255, 0.1)"
+      strokeWidth="3"
+    />
+    <path
+      d="M18 2.0845
+        a 15.9155 15.9155 0 0 1 0 31.831
+        a 15.9155 15.9155 0 0 1 0 -31.831"
+      fill="none"
+      stroke="url(#gradient)"
+      strokeWidth="3"
+      strokeDasharray={`${value}, 100`}
+    />
+    <defs>
+      <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%" stopColor="#ec4899" />
+        <stop offset="50%" stopColor="#a855f7" />
+        <stop offset="100%" stopColor="#06b6d4" />
+      </linearGradient>
+    </defs>
+  </svg>
+);
+
 const StatBar = ({ label, value, color }: { label: string; value: number; color: string }) => (
   <div className="mb-2 sm:mb-3 w-full">
     <div className="flex justify-between text-[10px] sm:text-sm mb-1">
@@ -68,10 +108,9 @@ const StatBar = ({ label, value, color }: { label: string; value: number; color:
   </div>
 );
 
-export default function ResultCard({ score, twitterUsername }: ResultCardProps) {
+const ResultCard = ({ score, twitterUsername }: ResultCardProps) => {
   const [isCardFlipped, setIsCardFlipped] = useState(false);
   const [imageError, setImageError] = useState(false);
-  const [isGeneratingImage, setIsGeneratingImage] = useState(false);
   const [isLoadingTitle, setIsLoadingTitle] = useState(true);
   const [profileImageUrl, setProfileImageUrl] = useState('');
   const cardRef = useRef<HTMLDivElement>(null);
@@ -101,7 +140,6 @@ export default function ResultCard({ score, twitterUsername }: ResultCardProps) 
     setTraits(rank.traits || []);
   }, [score, getRank]);
 
-  // Generate title only once when component mounts
   useEffect(() => {
     const titleKey = `trauma-title-${score}-${twitterUsername || ''}`;
     const cachedTitle = sessionStorage.getItem(titleKey);
@@ -140,73 +178,6 @@ export default function ResultCard({ score, twitterUsername }: ResultCardProps) 
 
     generateTitle();
   }, [score, currentRank.traits, twitterUsername]);
-
-  const generateImage = async () => {
-    const cardBack = cardRef.current?.querySelector('.card-back') as HTMLDivElement;
-    if (!cardBack || !isCardFlipped) return null;
-    
-    try {
-      setIsGeneratingImage(true);
-      
-      // Temporarily modify styles for capture
-      const originalTransform = cardBack.style.transform;
-      const originalRotation = cardBack.style.rotate;
-      cardBack.style.transform = 'none';
-      cardBack.style.rotate = '0deg';
-
-      // Add background temporarily for capture
-      cardBack.style.background = 'linear-gradient(to bottom right, rgb(88, 28, 135), rgb(30, 27, 75), rgb(134, 25, 143))';
-
-      const dataUrl = await htmlToImage.toPng(cardBack, {
-        quality: 1,
-        pixelRatio: 2,
-        backgroundColor: '#1e1b4b',
-        style: {
-          transform: 'none',
-          rotate: '0deg'
-        }
-      });
-
-      // Restore original styles
-      cardBack.style.transform = originalTransform;
-      cardBack.style.rotate = originalRotation;
-      cardBack.style.background = '';
-
-      return dataUrl;
-    } catch (error) {
-      console.error('Error generating image:', error);
-      return null;
-    } finally {
-      setIsGeneratingImage(false);
-    }
-  };
-
-  const handleTwitterShare = async () => {
-    const imageUrl = await generateImage();
-    
-    if (!imageUrl) {
-      alert('Failed to generate image. Please try again.');
-      return;
-    }
-
-    const text = `I got ${currentRank.title} with ${score}% Crypto Trauma.\n${currentRank.quote}\n\nCheck your trauma score at rugmeter.app 👉`;
-    const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`;
-    window.open(twitterUrl, '_blank');
-  };
-
-  const handleDownload = async () => {
-    const imageUrl = await generateImage();
-    
-    if (!imageUrl) {
-      alert('Failed to generate image. Please try again.');
-      return;
-    }
-
-    const link = document.createElement('a');
-    link.download = 'crypto-trauma-card.png';
-    link.href = imageUrl;
-    link.click();
-  };
 
   return (
     <div className="min-h-screen w-full flex flex-col items-center justify-center p-4">
@@ -280,32 +251,7 @@ export default function ResultCard({ score, twitterUsername }: ResultCardProps) 
             {/* Trauma Score Circle */}
             <div className="flex justify-center mb-4">
               <div className="relative w-24 h-24 sm:w-28 sm:h-28">
-                <svg className="w-full h-full -rotate-90" viewBox="0 0 36 36">
-                  <path
-                    d="M18 2.0845
-                      a 15.9155 15.9155 0 0 1 0 31.831
-                      a 15.9155 15.9155 0 0 1 0 -31.831"
-                    fill="none"
-                    stroke="rgba(255, 255, 255, 0.1)"
-                    strokeWidth="3"
-                  />
-                  <path
-                    d="M18 2.0845
-                      a 15.9155 15.9155 0 0 1 0 31.831
-                      a 15.9155 15.9155 0 0 1 0 -31.831"
-                    fill="none"
-                    stroke="url(#gradient)"
-                    strokeWidth="3"
-                    strokeDasharray={`${score}, 100`}
-                  />
-                  <defs>
-                    <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                      <stop offset="0%" stopColor="#ec4899" />
-                      <stop offset="50%" stopColor="#a855f7" />
-                      <stop offset="100%" stopColor="#06b6d4" />
-                    </linearGradient>
-                  </defs>
-                </svg>
+                <CircleProgress value={score} />
                 <div className="absolute inset-0 flex flex-col items-center justify-center">
                   <span className="text-xl sm:text-2xl font-bold text-white">{score}%</span>
                   <span className="text-[10px] sm:text-xs text-purple-300">TRAUMA</span>
@@ -352,62 +298,20 @@ export default function ResultCard({ score, twitterUsername }: ResultCardProps) 
               &ldquo;{currentRank.quote}&rdquo;
             </div>
 
-            {/* Action Buttons */}
-            <div className="mt-auto space-y-2 sm:space-y-3">
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={handleTwitterShare}
-                disabled={isGeneratingImage}
-                className="w-full py-2.5 sm:py-3 px-4 bg-[#1DA1F2] hover:bg-[#1a8cd8]
-                        text-white rounded-lg font-semibold shadow-lg
-                        disabled:opacity-50 disabled:cursor-not-allowed
-                        flex items-center justify-center gap-2
-                        text-sm sm:text-base"
-              >
-                {isGeneratingImage ? (
-                  'Generating Image...'
-                ) : (
-                  <>
-                    <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/>
-                    </svg>
-                    Share on Twitter
-                  </>
-                )}
-              </motion.button>
-
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={handleDownload}
-                disabled={isGeneratingImage}
-                className="w-full py-2.5 sm:py-3 px-4 bg-gradient-to-r from-pink-500 via-purple-500 to-cyan-500 
-                        text-white rounded-lg font-semibold shadow-lg hover:shadow-pink-500/25
-                        disabled:opacity-50 disabled:cursor-not-allowed
-                        flex items-center justify-center gap-2
-                        text-sm sm:text-base"
-              >
-                {isGeneratingImage ? (
-                  'Generating Image...'
-                ) : (
-                  <>
-                    <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
-                    </svg>
-                    Download Card
-                  </>
-                )}
-              </motion.button>
-            </div>
-
-            {/* Watermark */}
-            <div className="mt-2 text-center text-purple-300/50 text-[10px] sm:text-xs">
-              rugmeter.app
+            {/* Share Info */}
+            <div className="mt-auto">
+              <div className="text-center text-purple-300/50 text-[10px] sm:text-xs">
+                Take a screenshot and share your results on X (Twitter) 🎯
+              </div>
+              <div className="text-center text-purple-300/50 text-[10px] sm:text-xs mt-1">
+                rugmeter.app
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
   );
-} 
+};
+
+export default ResultCard; 
