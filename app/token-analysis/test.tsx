@@ -2,6 +2,73 @@
 
 import { useEffect, useState } from 'react';
 
+interface TokenData {
+  address: string;
+  liquidity: number;
+  fdv: number;
+  volume24h: number;
+  netVolume24h: number;
+  buyers24h: number;
+  sellers24h: number;
+  totalTraders24h: number;
+  buyVolume: {
+    '5m': string;
+    '1h': number;
+    '6h': number;
+    '24h': number;
+  };
+  sellVolume: {
+    '5m': number;
+    '1h': number;
+    '6h': number;
+    '24h': number;
+  };
+  totalBuys: {
+    '5m': string;
+    '1h': number;
+    '6h': number;
+    '24h': number;
+  };
+  totalSells: {
+    '5m': number;
+    '1h': number;
+    '6h': number;
+    '24h': number;
+  };
+}
+
+interface AnalysisResult {
+  trendAnalysis: {
+    direction: string;
+    trendStrength: string;
+    rsi: string;
+    macd: string;
+  };
+  marketStructure: {
+    liquidityRating: string;
+    marketEfficiency: string;
+    volatilityScore: string;
+    betaToSol: string;
+  };
+  volumeAnalysis: {
+    buyPressure: string;
+    sellPressure: string;
+    volumeProfile: string;
+  };
+  riskMetrics: {
+    sharpeRatio: string;
+    maxDrawdown: string;
+    volatility: string;
+  };
+  overallScore: string;
+  summary: string;
+}
+
+interface ApiResponse {
+  tokenData: TokenData;
+  analysis: AnalysisResult;
+}
+
 interface TestProps {
   data: {
     name: string;
@@ -19,7 +86,7 @@ export default function Test({ data }: TestProps) {
 }
 
 export function TokenAnalysisTest() {
-  const [result, setResult] = useState<any>(null);
+  const [result, setResult] = useState<ApiResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
