@@ -6,6 +6,7 @@ import Image from 'next/image';
 interface ResultCardProps {
   score: number;
   twitterUsername?: string;
+  onBackHome?: () => void;
 }
 
 const getDefaultRank = (score: number) => {
@@ -99,7 +100,7 @@ const StatBar = ({ label, value, color }: { label: string; value: number; color:
   </div>
 );
 
-const ResultCard = ({ score, twitterUsername }: ResultCardProps) => {
+const ResultCard = ({ score, twitterUsername, onBackHome }: ResultCardProps) => {
   const [isCardFlipped, setIsCardFlipped] = useState(false);
   const [imageError, setImageError] = useState(false);
   const [isLoadingTitle, setIsLoadingTitle] = useState(true);
@@ -297,6 +298,16 @@ const ResultCard = ({ score, twitterUsername }: ResultCardProps) => {
               <div className="text-center text-purple-300/50 text-[10px] sm:text-xs mt-1">
                 rugmeter.app
               </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex flex-col gap-3 mt-6">
+              <button
+                onClick={onBackHome}
+                className="w-full py-3 px-4 bg-gradient-to-r from-pink-500 via-purple-500 to-cyan-500 text-white font-bold rounded-lg hover:opacity-90 transition-opacity"
+              >
+                Back to Home
+              </button>
             </div>
           </div>
         </div>

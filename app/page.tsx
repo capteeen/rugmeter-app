@@ -27,7 +27,12 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen w-full flex flex-col items-center justify-center bg-gradient-to-br from-purple-900 via-indigo-900 to-pink-800 relative overflow-hidden">
+    <main className="min-h-screen w-full flex flex-col items-center justify-center relative overflow-hidden" style={{
+      backgroundImage: `url('/ChatGPT Image Apr 25, 2025 at 04_14_03 PM.png')`,
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+    }}>
+      <div className="absolute inset-0 bg-gradient-to-br from-purple-900/80 via-indigo-900/80 to-pink-800/80" />
       <AnimatePresence mode="wait">
         {currentStep === 'home' && (
           <motion.div
@@ -73,7 +78,11 @@ export default function Home() {
             exit={{ opacity: 0, y: -20 }}
             className="w-full"
           >
-            <ResultCard score={score} twitterUsername={twitterUsername} />
+            <ResultCard 
+              score={score} 
+              twitterUsername={twitterUsername} 
+              onBackHome={() => setCurrentStep('home')}
+            />
           </motion.div>
         )}
       </AnimatePresence>
