@@ -2,7 +2,23 @@
 
 import { useEffect, useState } from 'react';
 
-export default function TokenAnalysisTest() {
+interface TestProps {
+  data: {
+    name: string;
+    value: string | number;
+  };
+}
+
+export default function Test({ data }: TestProps) {
+  return (
+    <div>
+      <h1>{data.name}</h1>
+      <p>{data.value}</p>
+    </div>
+  );
+}
+
+export function TokenAnalysisTest() {
   const [result, setResult] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);

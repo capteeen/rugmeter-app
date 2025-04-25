@@ -90,28 +90,6 @@ export async function GET(request: Request) {
       );
     }
 
-    // Basic token data response (without OpenAI analysis)
-    const basicResponse = {
-      tokenData: {
-        address: tokenData.tokenAddress,
-        liquidity: parseFloat(tokenData.totalLiquidityUsd || '0'),
-        fdv: parseFloat(tokenData.totalFullyDilutedValuation || '0'),
-        volume24h: 0,
-        netVolume24h: 0,
-        buyers24h: 0,
-        sellers24h: 0,
-        totalTraders24h: 0,
-        buyVolume: tokenData.totalBuyVolume || {},
-        sellVolume: tokenData.totalSellVolume || {},
-        totalBuys: tokenData.totalBuys || {},
-        totalSells: tokenData.totalSells || {},
-      },
-      analysis: {
-        score: 5,
-        comment: "Basic token data provided without AI analysis.",
-      },
-    };
-
     // If OpenAI is not configured, return basic response
     if (!openai) {
       console.error('OpenAI client not initialized');
@@ -120,11 +98,11 @@ export async function GET(request: Request) {
           address: tokenData.tokenAddress,
           liquidity: parseFloat(tokenData.totalLiquidityUsd || '0'),
           fdv: parseFloat(tokenData.totalFullyDilutedValuation || '0'),
-          volume24h: 0,
-          netVolume24h: 0,
-          buyers24h: 0,
-          sellers24h: 0,
-          totalTraders24h: 0,
+          volume24h: parseFloat(tokenData.totalVolume?.['24h'] || '0'),
+          netVolume24h: parseFloat(tokenData.netVolume?.['24h'] || '0'),
+          buyers24h: parseInt(tokenData.totalBuyers?.['24h'] || '0'),
+          sellers24h: parseInt(tokenData.totalSellers?.['24h'] || '0'),
+          totalTraders24h: parseInt(tokenData.totalTraders?.['24h'] || '0'),
           buyVolume: tokenData.totalBuyVolume || {},
           sellVolume: tokenData.totalSellVolume || {},
           totalBuys: tokenData.totalBuys || {},
@@ -154,7 +132,7 @@ export async function GET(request: Request) {
             volatility: "50%"
           },
           overallScore: "50",
-          summary: "AI analysis is currently unavailable. Please check your OpenAI API key configuration."
+          summary: "AI analysis is currently unavailable. Please check OpenAI API configuration."
         }
       }, { headers: jsonHeaders });
     }

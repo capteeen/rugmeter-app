@@ -4,7 +4,18 @@ const nextConfig = {
     domains: ['unavatar.io'],
   },
   experimental: {
-    serverActions: true,
+    serverActions: {
+      allowedOrigins: ['localhost:3000']
+    }
+  },
+  webpack: (config, { isServer }) => {
+    // Handle Handlebars require.extensions warning
+    config.resolve.fallback = {
+      ...config.resolve.fallback,
+      fs: false,
+      module: false,
+    };
+    return config;
   },
 }
 
