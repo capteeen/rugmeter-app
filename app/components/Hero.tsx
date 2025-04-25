@@ -82,6 +82,15 @@ export default function Hero({ onStart }: HeroProps) {
           Start Quiz
         </motion.button>
 
+        <div className="mt-4">
+          <a
+            href="/token-analysis"
+            className="text-purple-300 hover:text-white transition-colors text-sm"
+          >
+            Analyze Token →
+          </a>
+        </div>
+
         <ContractSection />
       </motion.div>
     </div>
