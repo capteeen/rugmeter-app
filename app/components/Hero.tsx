@@ -73,65 +73,38 @@ export default function Hero({ onStart }: HeroProps) {
           Measure your crypto trauma and get your official Degen Rank™️
         </p>
         
-        <div className="flex flex-col items-center gap-4">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="text-center"
+        <div className="flex items-center justify-center gap-4">
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={onStart}
+            className="px-8 py-4 text-xl font-bold rounded-lg bg-gradient-to-r from-pink-500 via-purple-500 to-cyan-500 text-white shadow-lg transform transition-all hover:shadow-pink-500/25 hover:from-pink-600 hover:via-purple-600 hover:to-cyan-600 cursor-pointer"
           >
-            <h1 className="text-4xl md:text-6xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-purple-500 to-cyan-500">
-              Rug Meter
-            </h1>
-            <p className="text-lg md:text-xl text-gray-300 max-w-2xl mx-auto">
-              Your trusted companion in the Solana ecosystem. Analyze tokens, detect potential risks, and make informed decisions.
-            </p>
-          </motion.div>
+            Start Quiz
+          </motion.button>
 
-          <div className="flex flex-col sm:flex-row items-center gap-4">
-            <motion.a
-              href="/quiz"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="px-8 py-3 bg-gradient-to-r from-pink-500 via-purple-500 to-cyan-500 text-white font-bold rounded-lg hover:opacity-90 transition-opacity"
-            >
-              Start Quiz
-            </motion.a>
-            
-            <motion.a
-              href="/token-analysis"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-              className="px-8 py-3 bg-black/30 border border-purple-500/30 text-white font-bold rounded-lg hover:bg-black/40 transition-all"
-            >
-              Analyze Token
-            </motion.a>
-          </div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-            className="flex items-center gap-4 mt-2"
+          <motion.a
+            href="/token-analysis"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="px-8 py-4 text-xl font-bold rounded-lg bg-gradient-to-r from-purple-500 via-indigo-500 to-blue-500 text-white shadow-lg transform transition-all hover:shadow-purple-500/25 hover:from-purple-600 hover:via-indigo-600 hover:to-blue-600 cursor-pointer"
           >
-            <a
-              href="https://x.com/rugmeter_sol?s=21&t=ARvJV7n4r1UMTlD-08jo_g"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-gray-300 hover:text-white transition-colors flex items-center gap-2"
-            >
-              <svg
-                viewBox="0 0 24 24"
-                className="w-6 h-6 fill-current"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-              </svg>
-              <span>Follow us on X</span>
-            </a>
-          </motion.div>
+            Analyze Token
+          </motion.a>
+        </div>
+
+        <div className="mt-4">
+          <a
+            href="https://x.com/rugmeter_sol?s=21&t=ARvJV7n4r1UMTlD-08jo_g"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-purple-300 hover:text-white transition-colors text-sm flex items-center gap-1 justify-center"
+          >
+            <svg viewBox="0 0 24 24" className="w-4 h-4 fill-current" aria-hidden="true">
+              <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+            </svg>
+            Follow us
+          </a>
         </div>
 
         <ContractSection />
