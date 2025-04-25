@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Button } from "../../components/ui/button";
 
 interface HeroProps {
   onStart: () => void;
@@ -59,8 +58,6 @@ const ContractSection = () => {
 };
 
 export default function Hero({ onStart }: HeroProps) {
-  const [isHovered, setIsHovered] = useState(false);
-
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-4 relative overflow-hidden">
       <motion.div
@@ -77,8 +74,6 @@ export default function Hero({ onStart }: HeroProps) {
         </p>
         
         <motion.button
-          onHoverStart={() => setIsHovered(true)}
-          onHoverEnd={() => setIsHovered(false)}
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={onStart}
